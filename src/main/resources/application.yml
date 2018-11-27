@@ -1,0 +1,54 @@
+#zuul:
+#  ratelimit:
+#    key-prefix: your-prefix
+#    enabled: true
+#    repository: REDIS
+#    behind-proxy: true
+#    default-policy-list: #optional - will apply unless specific policy exists
+#      - limit: 10 #optional - request number limit per refresh interval window
+#        quota: 1000 #optional - request time limit per refresh interval window (in seconds)
+#        refresh-interval: 60 #default value (in seconds)
+#        type: #optional
+#          - user
+#          - origin
+#          - url
+#    policy-list:
+#      - myse:
+#        - limit: 10 #optional - request number limit per refresh interval window
+#          quota: 1000 #optional - request time limit per refresh interval window (in seconds)
+#          refresh-interval: 60 #default value (in seconds)
+#          type: #optional
+#            - user
+#            - origin
+#            - url
+#        - type: #optional value for each type
+#            - user=anonymous
+#            - origin=somemachine.com
+#            - url=/api #url prefix
+#            - role=user
+#spring:
+#  application:
+#    name: test
+zuul:
+  routes:
+    serviceSimple:
+      path: /greeting/simple
+      url: forward:/
+    serviceAdvanced:
+      path: /greeting/advanced
+      url: http://www.baidu.com
+  ratelimit:
+    enabled: true
+    repository: jpa
+    policy-list:
+      serviceSimple:
+        - limit: 5 #可选 - 每个刷新间隔窗口的请求数限制
+          refresh-interval: 60 #刷新间隔 默认60秒
+          type:
+            - origin
+      serviceAdvanced:
+        - limit: 1 #2秒内只能刷新一次
+          refresh-interval: 2
+          type:
+            - origin
+  strip-prefix: true
